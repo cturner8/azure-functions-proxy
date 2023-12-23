@@ -1,0 +1,87 @@
+version: "3.9"
+
+services:
+  proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.10
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - 80:80
+      # The Web UI (enabled by --api.insecure=true)
+      - 8080:8080
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - proxy
+      - functions
+
+  products:
+    build:
+      context: Products
+    labels:
+      - "traefik.http.routers.products.rule=PathPrefix(`/products`)"
+      - "traefik.http.services.products.loadbalancer.server.port=80"
+    environment:
+      AzureWebJobsScriptRoot: /home/site/wwwroot
+      AzureFunctionsJobHost__Logging__Console__IsEnabled: true
+      AZURE_FUNCTIONS_ENVIRONMENT: Development
+      FUNCTIONS_EXTENSION_VERSION: ~4
+      FUNCTIONS_NODE_BLOCK_ON_ENTRY_POINT_ERROR: true
+      FUNCTIONS_WORKER_RUNTIME: node
+    networks:
+      - functions
+
+  payments:
+    build:
+      context: Payments
+    labels:
+      - "traefik.http.routers.payments.rule=PathPrefix(`/payments`)"
+      - "traefik.http.services.payments.loadbalancer.server.port=80"
+    environment:
+      AzureWebJobsScriptRoot: /home/site/wwwroot
+      AzureFunctionsJobHost__Logging__Console__IsEnabled: true
+      AZURE_FUNCTIONS_ENVIRONMENT: Development
+      FUNCTIONS_EXTENSION_VERSION: ~4
+      FUNCTIONS_NODE_BLOCK_ON_ENTRY_POINT_ERROR: true
+      FUNCTIONS_WORKER_RUNTIME: node
+    networks:
+      - functions
+
+  orders:
+    build:
+      context: Orders
+    labels:
+      - "traefik.http.routers.orders.rule=PathPrefix(`/orders`)"
+      - "traefik.http.services.orders.loadbalancer.server.port=80"
+    environment:
+      AzureWebJobsScriptRoot: /home/site/wwwroot
+      AzureFunctionsJobHost__Logging__Console__IsEnabled: true
+      AZURE_FUNCTIONS_ENVIRONMENT: Development
+      FUNCTIONS_EXTENSION_VERSION: ~4
+      FUNCTIONS_NODE_BLOCK_ON_ENTRY_POINT_ERROR: true
+      FUNCTIONS_WORKER_RUNTIME: node
+    networks:
+      - functions
+
+  accounts:
+    build:
+      context: Accounts
+    labels:
+      - "traefik.http.routers.accounts.rule=PathPrefix(`/accounts`)"
+      - "traefik.http.services.accounts.loadbalancer.server.port=80"
+    environment:
+      AzureWebJobsScriptRoot: /home/site/wwwroot
+      AzureFunctionsJobHost__Logging__Console__IsEnabled: true
+      AZURE_FUNCTIONS_ENVIRONMENT: Development
+      FUNCTIONS_EXTENSION_VERSION: ~4
+      FUNCTIONS_NODE_BLOCK_ON_ENTRY_POINT_ERROR: true
+      FUNCTIONS_WORKER_RUNTIME: node
+    networks:
+      - functions
+
+networks:
+  proxy: {}
+  functions: {}

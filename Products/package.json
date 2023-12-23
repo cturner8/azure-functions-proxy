@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "license": "UNLICENSED",
   "description": "",
-  "main": "dist/src/functions/*.js",
+  "main": "dist/*.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "build": "esbuild src/functions/*.ts --outdir=dist --minify --bundle --platform=node --packages=external --target=node18",
+    "watch": "yarn build --watch --sourcemap",
     "clean": "rimraf dist",
     "prestart": "yarn clean && yarn build",
     "start": "func start",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/node": "18.x",
     "azure-functions-core-tools": "^4.x",
+    "esbuild": "^0.19.10",
     "rimraf": "^5.0.0",
     "typescript": "^5.3.3"
   }
