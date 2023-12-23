@@ -4,26 +4,51 @@ services:
   proxy:
     # The official v2 Traefik docker image
     image: traefik:v2.10
-    # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
+    environment:
+      DUCKDNS_TOKEN_FILE: /run/secrets/traefik_dns_token
+      # CF_DNS_API_TOKEN_FILE: /run/secrets/traefik_cf-dns-api-token
+      TRAEFIK_CERTIFICATESRESOLVERS_acmeresolver_ACME_EMAIL: /run/secrets/acme_email
+    # command:
+    #   - "--log.level=DEBUG"
+    labels:
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.cturner-proxy.duckdns.org`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=cameron:$$2y$$05$$1q6DJCMpc6gT.cGRyc2BiOt6KcyHqUnrZn4Z1pMo2G.qhwR2JxO.G"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=acmeresolver"
+      - "traefik.http.routers.dashboard.tls.domains[0].main=cturner-proxy.duckdns.org"
+      - "traefik.http.routers.dashboard.tls.domains[0].sans=*.cturner-proxy.duckdns.org"
     ports:
-      # The HTTP port
-      - 80:80
-      # The Web UI (enabled by --api.insecure=true)
-      - 8080:8080
+      # The HTTPS port
+      - 443:443
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+      # Mount the static configuration file
+      - ./traefik.static.yml:/etc/traefik/traefik.yml
+      # # Mount the dynamic configuration file
+      # - ./traefik.dynamic.yml:/etc/traefik/dynamic/traefik.yml
+      # Mount the acme folder
+      - acme_data:/etc/traefik/acme
     networks:
       - proxy
       - functions
+    secrets:
+      - acme_email
+      - traefik_dns_token
 
   products:
     build:
       context: Products
     labels:
-      - "traefik.http.routers.products.rule=PathPrefix(`/products`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.products.rule=Host(`api.cturner-proxy.duckdns.org`) && PathPrefix(`/products`)"
       - "traefik.http.services.products.loadbalancer.server.port=80"
+      - "traefik.http.routers.products.entrypoints=websecure"
+      - "traefik.http.routers.products.tls.certresolver=acmeresolver"
+      - "traefik.http.routers.products.middlewares=auth"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
@@ -38,8 +63,12 @@ services:
     build:
       context: Payments
     labels:
-      - "traefik.http.routers.payments.rule=PathPrefix(`/payments`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.payments.rule=Host(`api.cturner-proxy.duckdns.org`) && PathPrefix(`/payments`)"
       - "traefik.http.services.payments.loadbalancer.server.port=80"
+      - "traefik.http.routers.payments.entrypoints=websecure"
+      - "traefik.http.routers.payments.tls.certresolver=acmeresolver"
+      - "traefik.http.routers.payments.middlewares=auth"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
@@ -54,8 +83,12 @@ services:
     build:
       context: Orders
     labels:
-      - "traefik.http.routers.orders.rule=PathPrefix(`/orders`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.orders.rule=Host(`api.cturner-proxy.duckdns.org`) && PathPrefix(`/orders`)"
       - "traefik.http.services.orders.loadbalancer.server.port=80"
+      - "traefik.http.routers.orders.entrypoints=websecure"
+      - "traefik.http.routers.orders.tls.certresolver=acmeresolver"
+      - "traefik.http.routers.orders.middlewares=auth"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
@@ -70,8 +103,12 @@ services:
     build:
       context: Accounts
     labels:
-      - "traefik.http.routers.accounts.rule=PathPrefix(`/accounts`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.accounts.rule=Host(`api.cturner-proxy.duckdns.org`) && PathPrefix(`/accounts`)"
       - "traefik.http.services.accounts.loadbalancer.server.port=80"
+      - "traefik.http.routers.accounts.entrypoints=websecure"
+      - "traefik.http.routers.accounts.tls.certresolver=acmeresolver"
+      - "traefik.http.routers.accounts.middlewares=auth"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
@@ -85,3 +122,14 @@ services:
 networks:
   proxy: {}
   functions: {}
+
+secrets:
+  acme_email:
+    file: ./secrets/acme_email.txt
+  traefik_dns_token:
+    file: ./secrets/duckdns_token.txt
+  # traefik_cf-dns-api-token:
+  #   external: true
+
+volumes:
+  acme_data: {}

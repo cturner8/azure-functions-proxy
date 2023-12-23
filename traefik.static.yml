@@ -1,0 +1,27 @@
+entryPoints:
+  websecure:
+    address: ":443"
+
+api:
+  dashboard: true
+
+providers:
+  docker:
+    {}
+    # exposedbydefault: false
+
+certificatesResolvers:
+  acmeresolver:
+    # Enable ACME (Let's Encrypt): automatic SSL.
+    acme:
+      # Email address used for registration.
+      # Required
+      # email: "test@example.com" // set in compose
+      # File or key used for certificates storage.
+      # Required
+      storage: "/etc/traefik/acme/acme.json"
+      # Required for wildcard certs
+      dnsChallenge:
+        provider: duckdns
+        # provider: cloudflare
+        delayBeforeCheck: 0
