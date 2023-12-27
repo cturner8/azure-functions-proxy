@@ -14,12 +14,14 @@ services:
       - "traefik.http.routers.dashboard.rule=Host(`traefik.cturner-proxy.duckdns.org`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.routers.dashboard.middlewares=auth,redirect"
       - "traefik.http.middlewares.auth.digestauth.users=cameron:traefik:57fb4108b5897aae80ca5000233a93ce"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=acmeresolver"
       - "traefik.http.routers.dashboard.tls.domains[0].main=cturner-proxy.duckdns.org"
       - "traefik.http.routers.dashboard.tls.domains[0].sans=*.cturner-proxy.duckdns.org"
+      - "traefik.http.middlewares.redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect.redirectscheme.permanent=true"
     ports:
       # The HTTPS port
       - 443:443
@@ -48,7 +50,7 @@ services:
       - "traefik.http.services.products.loadbalancer.server.port=80"
       - "traefik.http.routers.products.entrypoints=websecure"
       - "traefik.http.routers.products.tls.certresolver=acmeresolver"
-      - "traefik.http.routers.products.middlewares=auth"
+      - "traefik.http.routers.products.middlewares=auth,redirect"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
@@ -68,7 +70,7 @@ services:
       - "traefik.http.services.payments.loadbalancer.server.port=80"
       - "traefik.http.routers.payments.entrypoints=websecure"
       - "traefik.http.routers.payments.tls.certresolver=acmeresolver"
-      - "traefik.http.routers.payments.middlewares=auth"
+      - "traefik.http.routers.payments.middlewares=auth,redirect"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
@@ -88,7 +90,7 @@ services:
       - "traefik.http.services.orders.loadbalancer.server.port=80"
       - "traefik.http.routers.orders.entrypoints=websecure"
       - "traefik.http.routers.orders.tls.certresolver=acmeresolver"
-      - "traefik.http.routers.orders.middlewares=auth"
+      - "traefik.http.routers.orders.middlewares=auth,redirect"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
@@ -108,7 +110,7 @@ services:
       - "traefik.http.services.accounts.loadbalancer.server.port=80"
       - "traefik.http.routers.accounts.entrypoints=websecure"
       - "traefik.http.routers.accounts.tls.certresolver=acmeresolver"
-      - "traefik.http.routers.accounts.middlewares=auth"
+      - "traefik.http.routers.accounts.middlewares=auth,redirect"
     environment:
       AzureWebJobsScriptRoot: /home/site/wwwroot
       AzureFunctionsJobHost__Logging__Console__IsEnabled: true
