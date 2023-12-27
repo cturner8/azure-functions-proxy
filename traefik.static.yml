@@ -6,9 +6,9 @@ api:
   dashboard: true
 
 providers:
-  docker:
-    {}
-    # exposedbydefault: false
+  docker: {} # exposedbydefault: false
+  file:
+    filename: "/etc/traefik/dynamic/traefik.yml"
 
 certificatesResolvers:
   acmeresolver:

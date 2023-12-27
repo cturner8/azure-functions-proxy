@@ -1,0 +1,18 @@
+http:
+  routers:
+    router:
+      entryPoints:
+        - websecure
+      # middlewares:
+      #   - auth
+      service: router
+      rule: Host(`router.cturner-proxy.duckdns.org`)
+      tls:
+        certResolver: acmeresolver
+
+  services:
+    router:
+      loadBalancer:
+        servers:
+          - url: http://router.cturner.local:80
+        passHostHeader: false
