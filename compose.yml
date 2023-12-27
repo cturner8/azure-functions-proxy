@@ -15,7 +15,7 @@ services:
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=cameron:$$2y$$05$$1q6DJCMpc6gT.cGRyc2BiOt6KcyHqUnrZn4Z1pMo2G.qhwR2JxO.G"
+      - "traefik.http.middlewares.auth.digestauth.users=cameron:traefik:57fb4108b5897aae80ca5000233a93ce"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=acmeresolver"
       - "traefik.http.routers.dashboard.tls.domains[0].main=cturner-proxy.duckdns.org"
@@ -25,7 +25,7 @@ services:
       - 443:443
     volumes:
       # So that Traefik can listen to the Docker events
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       # Mount the static configuration file
       - ./traefik.static.yml:/etc/traefik/traefik.yml
       # # Mount the dynamic configuration file
